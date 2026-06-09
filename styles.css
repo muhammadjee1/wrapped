@@ -51,7 +51,7 @@ html, body {
 body {
   display: grid;
   place-items: center;
-  height: 100dvh;
+  height: 100svh;            /* smallest viewport pre-JS; app.js sets exact px from visualViewport */
   /* subtle paper grain behind the card on big screens */
   background-image:
     radial-gradient(transparent 0, rgba(0,0,0,.012) 100%);
@@ -91,23 +91,15 @@ body {
   position: absolute; right: 26px; bottom: 22px;
   width: 22px; height: 22px; z-index: 5; opacity: .8;
   color: var(--ink);
+  transform-origin: center;
+  animation: heartbeat 2.8s ease-in-out infinite;
 }
-
-/* ---------- progress segments ------------------------------------------ */
-.progress {
-  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
-  display: flex; gap: 4px; width: calc(100% - 96px); z-index: 6;
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1);    opacity: .78; }
+  14%      { transform: scale(1.18); opacity: 1; }
+  28%      { transform: scale(1.02); }
+  42%      { transform: scale(1.12); opacity: 1; }
 }
-.progress .seg {
-  flex: 1; height: 3px; border-radius: 3px;
-  background: rgba(47,58,48,.18); overflow: hidden;
-}
-.progress .seg > i {
-  display: block; height: 100%; width: 0; background: var(--ink);
-  transition: width .35s ease;
-}
-.progress .seg.done > i { width: 100%; }
-.progress .seg.active > i { width: 100%; }
 
 /* ---------- card layer -------------------------------------------------- */
 /* Cards sit above the tap zones but don't capture pointer events, so empty
@@ -119,8 +111,8 @@ body {
   display: flex; flex-direction: column;
   padding: 60px 34px 52px;
   opacity: 0; visibility: hidden;
-  transform: translateY(8px);
-  transition: opacity .5s ease, transform .5s ease, visibility .5s;
+  transform: translateY(28px) scale(.985);
+  transition: opacity .45s ease, transform .58s cubic-bezier(.16,.84,.3,1), visibility .5s;
 }
 .card.is-active { opacity: 1; visibility: visible; transform: none; }
 
@@ -155,12 +147,15 @@ body {
 .spacer { flex: 1 1 auto; }
 
 /* reveal animation helper (staggered children) */
-.reveal { opacity: 0; transform: translateY(10px); }
+.reveal { opacity: 0; transform: translateY(18px); }
 .is-active .reveal {
-  animation: rise .6s cubic-bezier(.2,.7,.2,1) forwards;
+  animation: rise .62s cubic-bezier(.16,.84,.3,1) both;
   animation-delay: calc(var(--i, 0) * 70ms);
 }
-@keyframes rise { to { opacity: 1; transform: none; } }
+@keyframes rise {
+  0%   { opacity: 0; transform: translateY(18px) scale(.98); }
+  100% { opacity: 1; transform: none; }
+}
 
 /* =========================================================================
    COVER
@@ -174,7 +169,12 @@ body {
   font-family: var(--f-script); font-weight: 700;
   font-size: 60px; line-height: .96; margin: 14px 0 6px;
 }
-.cover .amp { color: var(--gold); display: block; font-size: 40px; margin: 2px 0; }
+.cover .amp { color: var(--gold); display: block; font-size: 40px; margin: 2px 0;
+  animation: ampGlow 3.2s ease-in-out infinite; }
+@keyframes ampGlow {
+  0%, 100% { opacity: .9;  text-shadow: none; }
+  50%      { opacity: 1;   text-shadow: 0 0 14px rgba(211,162,63,.55); }
+}
 .cover .win {
   font-family: var(--f-mono); font-size: 13px; letter-spacing: .12em;
   color: var(--ink-2); margin-top: 10px;
@@ -316,8 +316,16 @@ body {
    TIMELINE (milestones)
    ========================================================================= */
 .timeline { margin-top: 6px; position: relative; padding-left: 22px; }
-.timeline::before { content:""; position:absolute; left: 6px; top: 4px; bottom: 4px; width: 1.5px; background: var(--ink); opacity:.4; }
-.tl-item { position: relative; padding: 0 0 16px 0; }
+.timeline::before { content:""; position:absolute; left: 6px; top: 4px; bottom: 4px; width: 1.5px; background: var(--ink); opacity:.4;
+  transform: scaleY(0); transform-origin: top; }
+.is-active .timeline::before { animation: drawLine .9s cubic-bezier(.4,.5,.2,1) forwards .1s; }
+@keyframes drawLine { to { transform: scaleY(1); } }
+.tl-item { position: relative; padding: 0 0 16px 0; opacity: 0; transform: translateX(-16px); }
+.is-active .tl-item {
+  animation: tlIn .5s cubic-bezier(.18,.84,.3,1) both;
+  animation-delay: calc(.22s + var(--i, 0) * 60ms);
+}
+@keyframes tlIn { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } }
 .tl-item::before { content:""; position:absolute; left: -22px; top: 4px; width: 9px; height:9px; border-radius:50%; background: var(--paper); border: 1.6px solid var(--ink); }
 .tl-item.gold::before { background: var(--gold); border-color: var(--gold); }
 .tl-item .d { font-family: var(--f-mono); font-size: 11px; color: var(--gold); font-weight: 700; }
@@ -387,6 +395,14 @@ body {
 .timeline-card .tl-item.muted .s { display: none; }   /* keep muted dates to one line so 14 fit */
 
 /* still mode (screenshots): everything in its final, settled state */
-.still .reveal { opacity: 1 !important; transform: none !important; animation: none !important; }
+.still .reveal,
+.still .tl-item,
 .still .heat .cell { opacity: 1 !important; transform: none !important; animation: none !important; }
+.still .timeline::before { transform: scaleY(1) !important; animation: none !important; }
+.still .heart, .still .cover .amp { animation: none !important; }
 .still .bars .bar, .still .chan .fill { transition: none !important; }
+
+/* respect reduced-motion: keep entrances but kill the looping flourishes */
+@media (prefers-reduced-motion: reduce) {
+  .heart, .cover .amp, .cover .tapcue { animation: none !important; }
+}

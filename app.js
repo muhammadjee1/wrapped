@@ -1,12 +1,11 @@
 /*
  * app.js — the story engine: builds the cards, wires tap / swipe / keyboard
- * navigation, drives the segmented progress bar, and replays the per-card
- * animations (number count-ups, growing bars) each time a card lands.
+ * navigation, scales the fixed canvas to fit the viewport, and replays the
+ * per-card entrance animations (count-ups, growing bars) each time a card lands.
  */
 (function () {
   const stage = document.getElementById("stage");
   const cardsLayer = document.getElementById("cards");
-  const progress = document.getElementById("progress");
 
   let index = 0;
   const total = CARDS.length;
@@ -14,11 +13,9 @@
   const STILL = /(?:\?|&)still/.test(location.search);
   if (STILL) document.body.classList.add("still");
 
-  // ---- build cards + progress segments ------------------------------------
+  // ---- build cards --------------------------------------------------------
   cardsLayer.innerHTML = CARDS.map((c) => c.render()).join("");
   const cardEls = Array.from(cardsLayer.querySelectorAll("[data-card]"));
-  progress.innerHTML = CARDS.map(() => `<div class="seg"><i></i></div>`).join("");
-  const segEls = Array.from(progress.children);
 
   // ---- count-up animation -------------------------------------------------
   function countUp(el, target, dur = 620) {
@@ -65,10 +62,6 @@
         animateCard(el);
       }
     });
-    segEls.forEach((seg, k) => {
-      seg.classList.toggle("done", k < index);
-      seg.classList.toggle("active", k === index);
-    });
   }
 
   const next = () => show(index + 1);
@@ -106,22 +99,35 @@
   }, { passive: true });
 
   // ---- scale the fixed 360x760 stage to fit any viewport ------------------
-  // Uniform scale-to-fit: works identically on every iPhone and survives iOS
-  // Safari's collapsing toolbar (we read visualViewport when available).
+  // Uniform scale-to-fit, sized to the *visible* viewport (visualViewport),
+  // which excludes iOS Safari's address/search bar — so the card centers in the
+  // visible area and the bottom bar never covers it. Extra bottom margin keeps
+  // it clear of the home indicator too.
   const _q = new URLSearchParams(location.search);
   const _fvw = +_q.get("vw"), _fvh = +_q.get("vh"); // test override for headless verification
   function fit() {
-    const pad = 14;
     const vv = window.visualViewport;
-    const w = (_fvw || (vv ? vv.width : window.innerWidth)) - pad * 2;
-    const h = (_fvh || (vv ? vv.height : window.innerHeight)) - pad * 2;
+    const vw = _fvw || (vv ? vv.width : window.innerWidth);
+    const vh = _fvh || (vv ? vv.height : window.innerHeight);
+    document.body.style.height = vh + "px"; // center within the visible area only
+    const padX = 14, padTop = 14, padBottom = 34;
+    const w = vw - padX * 2;
+    const h = vh - padTop - padBottom;
     const s = Math.max(0.2, Math.min(w / 360, h / 760));
-    stage.style.transform = `scale(${s})`;
+    // bias up by half the top/bottom padding gap so the bottom always clears
+    // Safari's search bar / the home indicator.
+    const bias = (padBottom - padTop) / 2;
+    stage.style.transform = `translateY(${-bias}px) scale(${s})`;
   }
   window.addEventListener("resize", fit);
-  window.addEventListener("orientationchange", fit);
-  if (window.visualViewport) window.visualViewport.addEventListener("resize", fit);
+  window.addEventListener("orientationchange", () => { fit(); setTimeout(fit, 250); });
+  window.addEventListener("load", fit);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", fit);
+    window.visualViewport.addEventListener("scroll", fit);
+  }
   fit();
+  setTimeout(fit, 300); // catch iOS' late first-paint viewport report
 
   // ---- go (optional #N deep-link to start on a given card) ----------------
   const startAt = parseInt((location.hash || "").replace("#", ""), 10);

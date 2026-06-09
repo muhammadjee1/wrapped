@@ -253,7 +253,7 @@ const CARDS = (() => {
       id: "timeline",
       render: () => {
         const items = D.timeline.map((m, i) =>
-          `<div class="tl-item ${m.tier} reveal" style="--i:${Math.min(i, 8)}">
+          `<div class="tl-item ${m.tier}" style="--i:${i}">
             <div class="d num">${m.date}</div>
             <div class="l">${m.label}</div>
             <div class="s">${m.sub}</div>
