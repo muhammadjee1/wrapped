@@ -101,6 +101,20 @@ body {
   42%      { transform: scale(1.12); opacity: 1; }
 }
 
+/* ---------- sound toggle ------------------------------------------------ */
+.mute {
+  position: absolute; top: 18px; right: 20px; z-index: 6;
+  width: 30px; height: 30px; padding: 5px;
+  border: 0; background: transparent; color: var(--ink);
+  opacity: .5; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: opacity .2s ease;
+}
+.mute:hover { opacity: .85; }
+.mute svg { width: 100%; height: 100%; display: block; }
+.mute .slash { display: none; }
+.mute.muted .wave { display: none; }
+.mute.muted .slash { display: block; }
+
 /* ---------- card layer -------------------------------------------------- */
 /* Cards sit above the tap zones but don't capture pointer events, so empty
    areas fall through to navigation; only real buttons/links opt back in. */

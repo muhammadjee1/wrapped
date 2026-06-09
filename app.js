@@ -64,8 +64,64 @@
     });
   }
 
-  const next = () => show(index + 1);
-  const prev = () => show(index - 1);
+  // ---- ambient music + soft UI blip --------------------------------------
+  // Browsers (esp. iOS Safari) block autoplay-with-sound until a gesture, so we
+  // start the track on the first tap — which is the "tap to begin" tap anyway.
+  const music = document.getElementById("bgm");
+  const muteBtn = document.getElementById("mute");
+  let musicStarted = false, userMuted = false, actx = null;
+  const VOL = 0.5;
+
+  function fadeTo(target, ms = 700) {
+    if (!music) return;
+    const from = music.volume, steps = 24, dt = ms / steps;
+    let i = 0;
+    const id = setInterval(() => {
+      i++;
+      music.volume = Math.max(0, Math.min(1, from + (target - from) * (i / steps)));
+      if (i >= steps) clearInterval(id);
+    }, dt);
+  }
+  function startMusic() {
+    if (STILL || musicStarted || userMuted || !music) return;
+    musicStarted = true;
+    music.volume = 0;
+    const p = music.play();
+    if (p && p.then) p.then(() => fadeTo(VOL)).catch(() => { musicStarted = false; });
+    else fadeTo(VOL);
+  }
+  function blip() {
+    if (STILL || userMuted) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === "suspended") actx.resume();
+      const t = actx.currentTime;
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(620, t);
+      o.frequency.exponentialRampToValueAtTime(880, t + 0.07);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.085, t + 0.012); // soft
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+      o.connect(g); g.connect(actx.destination);
+      o.start(t); o.stop(t + 0.18);
+    } catch (e) { /* no audio context — ignore */ }
+  }
+  if (muteBtn) muteBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    userMuted = !userMuted;
+    muteBtn.classList.toggle("muted", userMuted);
+    if (!music) return;
+    if (userMuted) fadeTo(0, 250);
+    else { musicStarted ? fadeTo(VOL, 300) : startMusic(); }
+  });
+  // safety net: any first interaction also kicks off the track
+  ["pointerdown", "touchstart", "keydown"].forEach((ev) =>
+    window.addEventListener(ev, startMusic, { once: true, passive: true }));
+
+  // ---- navigation (with the click blip) -----------------------------------
+  const next = () => { blip(); startMusic(); show(index + 1); };
+  const prev = () => { blip(); startMusic(); show(index - 1); };
 
   // ---- tap zones ----------------------------------------------------------
   document.getElementById("tap-prev").addEventListener("click", prev);

@@ -30,7 +30,23 @@
     <svg class="heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
       <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z" />
     </svg>
+
+    <!-- sound toggle (music autoplays on first tap; this silences it) -->
+    <button id="mute" class="mute" aria-label="Toggle sound">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 9.5h3l4-3.5v12l-4-3.5H4z"/>
+        <path class="wave" d="M15 9.2a4 4 0 0 1 0 5.6"/>
+        <path class="wave" d="M17.4 7a7 7 0 0 1 0 10"/>
+        <line class="slash" x1="3.5" y1="3.5" x2="20.5" y2="20.5"/>
+      </svg>
+    </button>
   </main>
+
+  <!-- ambient track (trimmed to start at 0:25), loops; starts on first tap -->
+  <audio id="bgm" loop preload="auto">
+    <source src="audio/song.mp3" type="audio/mpeg" />
+  </audio>
 
   <script src="data.js"></script>
   <script src="frame.js"></script>
