@@ -1,136 +1,124 @@
 /*
  * data.js — every number the story shows, in one place.
  *
- * All values here are the real aggregates pulled from data/_summary.json,
- * data/imessage.json, data/snapchat.json and data/dates.json (as of 2026-06-08).
- * The eventual `merge` step can overwrite this file from dataset.json without
- * touching any of the UI. Anything not yet derived from data is marked TODO.
+ * Real aggregates from data/*.json (computed 2026-06-09 via extract/_wrapped_stats.cjs).
+ * The eventual `merge`/dataset.json can overwrite this file without touching the UI.
+ * NOTE: calls/FaceTime are intentionally excluded everywhere — the call data isn't
+ * accurate yet, so no card uses it.
  */
 window.WRAPPED = {
-  people: {
-    me: "Muhammad",
-    her: "Haniya",
-    herShort: "Hani",
-  },
-
+  people: { me: "Muhammad", her: "Haniya", herShort: "Hani" },
   window: { label: "Jan – Jun 2026", year: "2026" },
 
-  // ---- Card 1: the receipts -------------------------------------------------
+  // ---- Card: the receipts (totals only — never "who did more") --------------
   totals: {
-    messages: 49904,          // all five platforms
-    meMessages: 24791,
-    herMessages: 25113,
-    daysTalked: 148,          // iMessage active days (texted essentially every day)
-    dates: 14,                // 12 in-person + 2 virtual
-    photos: 4180,             // combined unique (2,395 iMessage + 1,785 shared album)
-    reels: 3997,              // Instagram reels traded
+    messages: 49904,
+    daysTalked: 148,          // texted essentially every single day
+    dates: 14,
+    photos: 4180,             // 2,395 shared in chat + 1,785 taken on dates (album)
+    reels: 3997,
     tiktoks: 800,
-    snaps: 301,
-    tapbacks: 17951,          // iMessage reactions (own bucket — never summed in)
-    callHours: 5.93,          // WhatsApp only so far
+    perDay: 337,              // 49,904 / 148
   },
+  receiptsNote: "About 337 messages a day. Every day. For six straight months.",
 
-  // ---- Card 2: how it started ----------------------------------------------
+  // ---- Card: how it started (the REAL first contact — Instagram) -----------
   firstText: {
-    dateLabel: "Jan 12, 2026 · 10:35 PM",
-    her: "hii this is haniya!",
-    me: "hellooo",
-    gapLabel: "7 minutes later",
-    note: "She texted first. On iMessage. He took seven minutes to play it cool.",
+    where: "Instagram",
+    dateLabel: "Dec 30, 2025",
+    // he slid into her DMs with a bit — a fake "tech support" scam
+    me1: "Hello dear, this is Apple tech support. We've detected a serious virus on your phone. Please send $500 in App Store gift cards immediately. Very urgent matter.",
+    her1: "good try, u almost had me",
+    me2: "worth a shot",
+    note: "He messaged first — on Instagram, with a bit. She saw right through it. Six months later, here we are.",
   },
 
-  // ---- Card 3: the shape of us (messages / month) --------------------------
-  // iMessage byMonth (the spine of the relationship). June is a partial month.
-  months: [
-    { label: "JAN", value: 6456 },
-    { label: "FEB", value: 6428 },
-    { label: "MAR", value: 6421 },
-    { label: "APR", value: 6051 },
-    { label: "MAY", value: 6098 },
-    { label: "JUN", value: 1289, partial: true },
+  // ---- Card: the shape of us (combined messages per month, all 5 platforms) -
+  shapeMonths: [
+    { label: "JAN", msgs: 7865 },
+    { label: "FEB", msgs: 7146 },
+    { label: "MAR", msgs: 8938 },
+    { label: "APR", msgs: 11783 },
+    { label: "MAY", msgs: 11602 },
+    { label: "JUN", msgs: 2543, partial: true },
   ],
-  shapeNote:
-    "Six months, barely a dip. You text like the first week never ended — " +
-    "(June's still being written).",
+  shapeNote: "It didn't fade — it grew. The messages climbed right into spring (June's still being written).",
 
-  // ---- Card 4: when we text (hourly) ---------------------------------------
-  // iMessage byHour, index 0..23 = 12am..11pm, Central time. Real marginal.
+  // ---- Card: when we text (hourly, real iMessage marginals) -----------------
   byHour: [
     2249, 1287, 499, 387, 332, 181, 362, 284, 267, 577, 1147, 1337,
     1331, 1570, 2276, 1763, 2284, 1521, 1375, 1884, 2129, 2141, 2810, 2750,
   ],
   byWeekday: [4895, 4140, 5234, 4562, 4552, 4304, 5056], // Sun..Sat
-  // Optional real 7x24 cross-tab (Sun..Sat rows). Null => app approximates it
-  // from byHour x byWeekday. Drop the real matrix here when merge computes it.
-  hourWeekday: null,
+  hourWeekday: null, // drop a real 7x24 (Sun..Sat) matrix here to replace the approximation
   peakHourLabel: "10 PM",
-  whenNote: "Every square is one hour of one weekday, shaded by volume.",
+  textsAllTime: 32743,
+  whenNote: "Each square is one hour of one weekday, shaded by volume.",
 
-  // ---- Card 5: the vocabulary ----------------------------------------------
-  emojisTotal: 16537, // me 6,950 + her 9,587 (iMessage)
+  // ---- Card: the vocabulary (emoji) ----------------------------------------
+  emojisTotal: 16537,
   topEmoji: [
-    { emoji: "😭", count: 2614 },
-    { emoji: "🙈", count: 1567 },
-    { emoji: "😹", count: 1150 },
-    { emoji: "🤭", count: 825 },
-    { emoji: "☺️", count: 790 },
-    { emoji: "😝", count: 642 },
-    { emoji: "👀", count: 547 },
-    { emoji: "😼", count: 537 },
-    { emoji: "😽", count: 441 },
+    { emoji: "😭", count: 2614 }, { emoji: "🙈", count: 1567 }, { emoji: "😹", count: 1150 },
+    { emoji: "🤭", count: 825 },  { emoji: "☺️", count: 790 },  { emoji: "😝", count: 642 },
+    { emoji: "👀", count: 547 },  { emoji: "😼", count: 537 },  { emoji: "😽", count: 441 },
   ],
-  vocabNote: "We said a lot. Mostly this.",
 
-  // ---- Card 6: every channel (the breadth angle) ---------------------------
+  // ---- Card: words of adoration (real text scan, all platforms) ------------
+  adoration: {
+    top: [
+      { word: "baby", count: 782 }, { word: "babe", count: 189 }, { word: "beautiful", count: 158 },
+      { word: "cutie", count: 90 }, { word: "princess", count: 61 }, { word: "handsome", count: 52 },
+      { word: "gorgeous", count: 29 }, { word: "my heart", count: 28 }, { word: "my girl", count: 28 },
+    ],
+    hisForHer: ["gorgeous", "princess", "wifey"],   // he says these; she basically doesn't
+    hersForHim: ["handsome"],                        // her signature for him
+    shared: { word: "baby", count: 782 },
+    note: "The names you actually call each other.",
+  },
+
+  // ---- Card: every channel --------------------------------------------------
   channels: [
-    { name: "iMessage", value: 32743, role: "home base — where it all began" },
+    { name: "iMessage", value: 32743, role: "home base — where it all lives" },
     { name: "Instagram", value: 14790, role: "the firehose · 3,997 reels traded" },
     { name: "TikTok", value: 1611, role: "brainrot delivery · 800 sent" },
     { name: "Snapchat", value: 479, role: "snaps, not chats · 301 snaps" },
-    { name: "WhatsApp", value: 281, role: "where we actually call" },
+    { name: "WhatsApp", value: 281, role: "the long-distance season · mostly photos" },
   ],
   channelsNote: "Not one app over a decade. Every app, over six months.",
 
-  // ---- Card 7: the call channel --------------------------------------------
-  calls: {
-    hours: 5.93,
-    count: 36,
-    video: 29,
-    voice: 7,
-    sheStarted: 23,
-    heStarted: 13,
-    note: "WhatsApp is where you stop typing and just talk.",
-  },
+  // ---- Card: the snaps (totals only) ---------------------------------------
+  snaps: { total: 301, photos: 211, videos: 90, streak: 114, saved: 169,
+    note: "A 114-day streak. 301 snaps. Mostly photos, the occasional 1-second video." },
 
-  // ---- Card 8: the snaps ----------------------------------------------------
-  snaps: {
-    total: 301,
-    me: 119,
-    her: 182,
-    photos: 211,
-    videos: 90,
-    streak: 114,
-    note: "A 114-day streak. 301 snaps. She out-snapped him, 182 to 119.",
-  },
-
-  // ---- Card 9 & 10: dates + milestones -------------------------------------
-  datesSummary: { inPerson: 12, virtual: 2, all: 14, firstDate: "2026-01-16" },
+  // ---- Card: 14 dates (the places) -----------------------------------------
+  datesSummary: { inPerson: 12, virtual: 2, all: 14 },
   datePlaces: [
     "Fengcha", "Main Event arcade", "La La Land", "matcha in the rain",
     "escape room", "Meow Wolf", "a photobooth", "Founders Plaza planes",
     "his birthday in Las Colinas", "a lakeside picnic", "Museum of Illusions",
     "a double date",
   ],
-  milestones: [
-    { date: "Jan 16", label: "First date", sub: "Fengcha · arcade · Harvest Hall" },
-    { date: "Jan 23", label: "First matcha & first shared umbrella", sub: "shopping in the rain" },
-    { date: "Mar 27", label: "First kiss", sub: "+ first photobooth, after Ready or Not 2" },
-    { date: "Apr 25", label: "His birthday — she planned all of it", sub: "gave her his Cornell sweatshirt" },
-    { date: "May 8", label: "Made it official", sub: "he asked, she said yes" },
-    { date: "May 29", label: "First double date", sub: "still going" },
+
+  // ---- Card: the timeline (ALL 14 dates; milestones highlighted, rest muted)-
+  // tier: "gold" = the headline moment · "mark" = a first · "muted" = a date
+  timeline: [
+    { date: "Jan 16", label: "First date", sub: "Fengcha · arcade · Harvest Hall", tier: "mark" },
+    { date: "Jan 23", label: "First matcha & shared umbrella", sub: "shopping in the rain", tier: "mark" },
+    { date: "Jan 29", label: "First virtual date", sub: "FaceTime at the mall", tier: "mark" },
+    { date: "Feb 18", label: "Dubai layover", sub: "live snaps from the Burj Khalifa", tier: "muted" },
+    { date: "Mar 04", label: "Escape room & Thai food", sub: "first date back from Pakistan", tier: "muted" },
+    { date: "Mar 12", label: "Meow Wolf", sub: "the exhibit + dinner", tier: "muted" },
+    { date: "Mar 27", label: "First kiss", sub: "+ first photobooth, after the movie", tier: "mark" },
+    { date: "Apr 03", label: "Project Hail Mary", sub: "airplane-watching at Founders Plaza", tier: "muted" },
+    { date: "Apr 16", label: "Tanger Outlets", sub: "shopping + a drive-thru", tier: "muted" },
+    { date: "Apr 25", label: "His birthday — she planned all of it", sub: "gave her his Cornell sweatshirt", tier: "mark" },
+    { date: "May 02", label: "First picnic", sub: "spotted a beaver · froyo", tier: "mark" },
+    { date: "May 08", label: "Made it official", sub: "he asked, she said yes", tier: "gold" },
+    { date: "May 17", label: "Movie night", sub: "Obsession · theater cuddles", tier: "muted" },
+    { date: "May 29", label: "First double date", sub: "still going", tier: "mark" },
   ],
 
-  // ---- Card 11: made it official -------------------------------------------
+  // ---- Card: made it official ----------------------------------------------
   official: {
     dateLabel: "May 8, 2026",
     place: "Lakeside Park, Highland Park",
@@ -138,9 +126,6 @@ window.WRAPPED = {
     note: "Picnic blanket, ducks everywhere, heads on laps. He asked. She said yes.",
   },
 
-  // ---- Card 12: closing -----------------------------------------------------
-  closing: {
-    headline: "and we're just getting started.",
-    sub: "Six months down. Here's to the rest.",
-  },
+  // ---- Card: closing --------------------------------------------------------
+  closing: { headline: "and we're just getting started.", sub: "Six months down. Here's to the rest." },
 };

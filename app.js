@@ -21,7 +21,7 @@
   const segEls = Array.from(progress.children);
 
   // ---- count-up animation -------------------------------------------------
-  function countUp(el, target, dur = 950) {
+  function countUp(el, target, dur = 620) {
     if (STILL) { el.textContent = Math.round(target).toLocaleString("en-US"); return; }
     const start = performance.now();
     const fmt = (v) => Math.round(v).toLocaleString("en-US");
@@ -40,11 +40,11 @@
     el.querySelectorAll("[data-count]").forEach((s) => {
       countUp(s, +s.getAttribute("data-count"));
     });
-    // grow bars (shape of us) — small delay so the rise() reveal settles
+    // grow bars (shape of us)
     el.querySelectorAll(".bars .bar[data-h]").forEach((b, i) => {
       if (STILL) { b.style.height = b.getAttribute("data-h") + "%"; return; }
       b.style.height = "0%";
-      setTimeout(() => (b.style.height = b.getAttribute("data-h") + "%"), 120 + i * 60);
+      setTimeout(() => (b.style.height = b.getAttribute("data-h") + "%"), 120 + i * 55);
     });
     // grow channel fills
     el.querySelectorAll(".chan .fill[data-w]").forEach((f, i) => {
@@ -104,6 +104,24 @@
       dx < 0 ? next() : prev();
     }
   }, { passive: true });
+
+  // ---- scale the fixed 360x760 stage to fit any viewport ------------------
+  // Uniform scale-to-fit: works identically on every iPhone and survives iOS
+  // Safari's collapsing toolbar (we read visualViewport when available).
+  const _q = new URLSearchParams(location.search);
+  const _fvw = +_q.get("vw"), _fvh = +_q.get("vh"); // test override for headless verification
+  function fit() {
+    const pad = 14;
+    const vv = window.visualViewport;
+    const w = (_fvw || (vv ? vv.width : window.innerWidth)) - pad * 2;
+    const h = (_fvh || (vv ? vv.height : window.innerHeight)) - pad * 2;
+    const s = Math.max(0.2, Math.min(w / 360, h / 760));
+    stage.style.transform = `scale(${s})`;
+  }
+  window.addEventListener("resize", fit);
+  window.addEventListener("orientationchange", fit);
+  if (window.visualViewport) window.visualViewport.addEventListener("resize", fit);
+  fit();
 
   // ---- go (optional #N deep-link to start on a given card) ----------------
   const startAt = parseInt((location.hash || "").replace("#", ""), 10);

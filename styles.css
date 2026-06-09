@@ -51,25 +51,29 @@ html, body {
 body {
   display: grid;
   place-items: center;
-  min-height: 100dvh;
-  padding: 16px;
+  height: 100dvh;
   /* subtle paper grain behind the card on big screens */
   background-image:
     radial-gradient(transparent 0, rgba(0,0,0,.012) 100%);
 }
 
-/* ---------- the phone-shaped stage ------------------------------------- */
+/* ---------- the phone-shaped stage -------------------------------------
+   Authored at a fixed 360x760 canvas and scaled to fit the viewport by JS
+   (app.js fit()). Uniform scale = nothing ever clips, on any iPhone, and it
+   sidesteps iOS Safari's dynamic-toolbar dvh quirks. */
 .stage {
   position: relative;
-  width: min(calc(100dvw - 24px), calc(100dvh * var(--card-w) / var(--card-h)));
-  max-width: 100%;
-  aspect-ratio: var(--card-w) / var(--card-h);
-  max-height: 100dvh;
+  width: 360px;
+  height: 760px;
+  flex: none;
+  transform-origin: center center;
   background: var(--paper);
   border-radius: 26px;
   box-shadow: 0 30px 70px -30px rgba(36,44,34,.45), 0 2px 0 rgba(255,255,255,.4) inset;
   overflow: hidden;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* the scalloped frame fills the stage and sits above the paper, below content */
@@ -231,7 +235,7 @@ body {
 /* =========================================================================
    BAR CHART (shape of us)
    ========================================================================= */
-.bars { display: flex; align-items: flex-end; gap: 9px; height: 230px; margin-top: 8px; }
+.bars { display: flex; align-items: flex-end; gap: 9px; height: 175px; margin-top: 6px; }
 .bars .col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
 .bars .bar {
   width: 100%; background: var(--bar); border-radius: 4px 4px 2px 2px;
@@ -295,7 +299,7 @@ body {
 .chan .role { font-family: var(--f-script); font-size: 14px; color: var(--ink-3); margin-top: 1px; }
 
 /* =========================================================================
-   BIG SINGLE STAT (calls, snaps, official)
+   BIG SINGLE STAT (snaps, official)
    ========================================================================= */
 .single { justify-content: center; }
 .single .big {
@@ -343,6 +347,44 @@ body {
 /* tiny utility */
 .mt-auto { margin-top: auto; }
 .center { text-align:center; }
+
+/* ---- receipts caption (replaces the old me/her split bar) -------------- */
+.receipts-note {
+  margin-top: 20px; text-align: center;
+  font-family: var(--f-script); font-size: 21px; line-height: 1.2; color: var(--ink-2);
+}
+
+/* ---- words of adoration ------------------------------------------------ */
+.adore-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 16px; }
+.adore-cell { border: 1.4px dashed var(--ink-3); border-radius: 12px;
+  padding: 13px 4px 10px; text-align: center; }
+.adore-cell .w { font-family: var(--f-script); font-size: 23px; line-height: 1; color: var(--ink); }
+.adore-cell .c { font-family: var(--f-mono); font-size: 11px; color: var(--ink-2); margin-top: 6px; }
+.adore-foot { margin-top: 18px; font-family: var(--f-script); font-size: 18px;
+  line-height: 1.28; color: var(--ink-2); }
+.adore-foot b { color: var(--gold); font-weight: 700; }
+.adore-foot .num { font-family: var(--f-mono); font-size: 15px; color: var(--ink); }
+
+/* ---- made it official --------------------------------------------------- */
+.said-yes { font-family: var(--f-script); font-weight: 700; font-size: 56px;
+  line-height: 1; margin-top: 10px; text-align: center; }
+
+/* ---- timeline tiers (all 14 dates; firsts in colour, rest muted) ------- */
+.timeline-card { padding-top: 48px; padding-bottom: 36px; }
+.timeline-card .eyebrow { margin-bottom: 4px; }
+.timeline-card .title { font-size: 37px; margin-bottom: 6px; }
+.timeline-card .timeline { padding-left: 20px; margin-top: 4px; }
+.timeline-card .tl-item { padding-bottom: 5px; }
+.timeline-card .tl-item .d { font-size: 9px; }
+.timeline-card .tl-item .l { font-size: 12px; line-height: 1.12; }
+.timeline-card .tl-item .s { font-size: 11.5px; line-height: 1.05; }
+.tl-item.mark::before { background: var(--ink); border-color: var(--ink); }
+.tl-item.gold::before { background: var(--gold); border-color: var(--gold); width: 11px; height: 11px; left: -23px; }
+.tl-item.gold .l { color: var(--ink); font-weight: 700; }
+.tl-item.muted .d { color: var(--ink-3); }
+.tl-item.muted .l { color: var(--ink-3); font-weight: 500; }
+.tl-item.muted::before { background: var(--paper); border-color: var(--ink-3); opacity: .6; }
+.timeline-card .tl-item.muted .s { display: none; }   /* keep muted dates to one line so 14 fit */
 
 /* still mode (screenshots): everything in its final, settled state */
 .still .reveal { opacity: 1 !important; transform: none !important; animation: none !important; }
